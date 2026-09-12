@@ -7,3 +7,5 @@ Only confirmed summaries are stored in the signed-in user’s existing private D
 The five latest organizer summaries enter voice startup context; older summaries remain in Notes and within the existing bounded note-retrieval window. New updates are sent to an active conversation on the same page. If adding on a different device, reconnect that device’s conversation to load the latest updates. Each email should contain a focused decision; break long threads into separate relevant messages.
 
 Validation: synthetic message extraction and conflict warning, UI confirmation, reload persistence, owner isolation, duplicate-save idempotency, origin/sign-in rejection, and voice startup context. No production messages were used as test fixtures.
+
+Review flags only concrete operational contradictions. Pending or previously unknown details retain attribution and uncertainty without a decision warning; harmless title variations are omitted. Summaries allow up to 480 characters each and must use complete sentences. Existing saved entries are not rewritten by this change.

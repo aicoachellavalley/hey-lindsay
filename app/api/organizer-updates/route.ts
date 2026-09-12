@@ -20,7 +20,7 @@ export async function POST(request:Request) {
         const result=await response.json() as {status?:string;output?:Array<{type:string;content?:Array<{type:string;text?:string}>}>};
         if(result.status!=='completed')return json({error:'The review did not finish. Try again; your text is still here.'},503);
         const text=result.output?.flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text||'').join('')||'';
-        const parsed=z.object({updates:z.array(z.object({fact:z.string().max(240),conflict:z.string().max(180)})).max(3)}).parse(JSON.parse(text));
+        const parsed=z.object({updates:z.array(z.object({fact:z.string().max(480),conflict:z.string().max(180)})).max(3)}).parse(JSON.parse(text));
         if(!parsed.updates.length)return json({error:'No clear event updates found. Paste the relevant decision or instruction and try again.'},422);
         const draft=updateDraft.parse({source,message_date:data.message_date,updates:parsed.updates});
         updateText(draft); // Reject credentials in generated summaries too.
