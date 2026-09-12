@@ -11,6 +11,6 @@ Four distinct information sources stay separate:
 
 `lib/server.ts` validates user/session and tool arguments. `lib/live-web.js` calls a fixed Exa endpoint with query/options only; it does not serialize conversation context, notes or attendees. Private note/profile text is compared locally to reject likely accidental disclosure. Known contact/credential/roster patterns are blocked. These defensive checks cannot prove that arbitrary natural-language input contains no private information; the agent is also instructed never to derive searches from private data.
 
-Exa: three bounded results, HTTPS source URLs, short excerpts and search retrieval timestamp. Six-second request timeout, response-size cap, short in-memory cache, no automatic retries, and Retry-After cooldown. No key means no registered search tool. Search failures are ordinary tool results and do not terminate voice.
+Exa: three bounded results, HTTPS source URLs, short excerpts and search retrieval timestamp. Fresh page fetching (`maxAgeHours: 0`), bounded excerpts retaining source date information, fourteen-second request timeout, response-size cap, short in-memory cache, no automatic retries, and Retry-After cooldown. No key means no registered search tool. Search failures are ordinary tool results and do not terminate voice.
 
 The AI Tinkerers connector is an HTTP MCP client scoped to one authorized event. It minimizes attendee fields, strips contact strings and uses a short-lived profile cache. Browser cookies are never used.
