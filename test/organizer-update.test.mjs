@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+const source=stripTypeScriptTypes(readFileSync(new URL('../lib/organizer-update.ts',import.meta.url),'utf8'),{mode:'strip'}).replace("from 'zod'",`from '${import.meta.resolve('zod')}'`);
+const {updateDraft,updateText,cleanMessage}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const draft={source:'Sample organizer email',message_date:'2030-09-14',updates:[{fact:'Lunch changes to sandwiches.',conflict:'The runbook says pizza; confirm the change.'}]};
+test('confirmed message retains attribution and unresolved conflict',()=>{const text=updateText(draft);assert.match(text,/2030-09-14/);assert.match(text,/Sample organizer email/);assert.match(text,/CONFLICT \/ CHECK/);assert.match(text,/do not replace the runbook/);});
+test('message summaries remove contacts and reject credentials',()=>{assert.equal(cleanMessage('Email demo@example.com or 555-123-4567'),'Email [email removed] or [phone removed]');assert.throws(()=>cleanMessage('Bearer '+'a'.repeat(30)));assert(!updateText({...draft,source:'demo@example.com'}).includes('demo@example.com'));});
+test('save schema bounds summaries and rejects empty or extra fields',()=>{assert.throws(()=>updateDraft.parse({...draft,updates:[]}));assert.throws(()=>updateDraft.parse({...draft,updates:Array(4).fill(draft.updates[0])}));assert.throws(()=>updateDraft.parse({...draft,raw_email:'Should not be persisted'}));assert.throws(()=>updateDraft.parse({...draft,updates:[{fact:'x'.repeat(241),conflict:''}]}));});

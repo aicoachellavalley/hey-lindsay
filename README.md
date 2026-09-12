@@ -87,3 +87,7 @@ Tests use synthetic data and mocked HTTP responses; they make no paid API reques
 - [Exa Search API](https://exa.ai/docs/reference/search)
 
 Stack: TypeScript, React, Vinext/Vite, Cloudflare Workers-compatible runtime, D1 and ChatGPT Sites hosting/auth. Dependency and vendored-component licenses remain in their original files.
+
+## Keep Lindsay informed
+
+Use **Update Lindsay** to paste an organizer message, review its concise summary and conflicts, then confirm. Saved summaries keep the source and message date and become voice context. See [organizer updates](docs/organizer-updates.md) for privacy and limits.

@@ -4,6 +4,7 @@ import { Mic, Square, ArrowUpRight, NotebookPen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { startVoice } from '@/lib/voice';
+import OrganizerUpdate from './organizer-update';
 
 type Entry = { id: string; kind: string; text: string; created_at: string; due_at: string | null };
 const date = (v: string) => new Date(v).toLocaleString('en-US', {timeZone:'America/Los_Angeles', month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
@@ -58,6 +59,7 @@ export default function Coordinator({ signedIn }: { signedIn: boolean }) {
       {audioBlocked && <Button variant="outline" onClick={()=>session.current?.resumeAudio()}>Enable speaker audio</Button>}
       <p className="notice" role="alert">{notice}</p><p className="saved-note" role="status">{saved ? `Saved · ${saved}`:''}</p></div>
     </section>
+    <div className="update-access">{signedIn && <OrganizerUpdate onSaved={entry=>{session.current?.organizerUpdated(entry);setSaved('Organizer update');void loadEntries().catch(()=>{});}}/>}</div>
     <footer className="context-footer"><div><span className="eyebrow">IN YOUR CORNER</span><p>Sample event · fictional runbook</p></div><div className="source-caption">Runbook + your notes<br/><span>Tinkerers · checked when you ask</span></div></footer>
   </main>;
 }

@@ -42,6 +42,10 @@ export async function readEntries(userId:string) {
   const count=await db().prepare('SELECT COUNT(*) AS total FROM organizer_entries WHERE user_id=?').bind(userId).first<{total:number}>();
   return {entries:rows.results,total:count?.total||0,limit:100,coverage:'Latest 100 records; recorded issues are not guaranteed unresolved. Reminders have no notifications.'};
 }
+export async function readOrganizerUpdates(userId:string) {
+  const rows=await db().prepare("SELECT text,created_at FROM organizer_entries WHERE user_id=? AND kind='update' ORDER BY created_at DESC,id DESC LIMIT 5").bind(userId).all();
+  return rows.results;
+}
 export async function facts():Promise<Fact[]> {
   await db().batch(initialFacts.map(f=>db().prepare('INSERT INTO event_facts (key,layer,source,retrieved_at,as_of,value_json) VALUES (?,?,?,?,?,?) ON CONFLICT(key) DO UPDATE SET layer=excluded.layer,source=excluded.source,retrieved_at=excluded.retrieved_at,as_of=excluded.as_of,value_json=excluded.value_json WHERE excluded.retrieved_at > event_facts.retrieved_at').bind(f.key,f.layer,f.source,f.retrieved_at,f.as_of,JSON.stringify(f.value))));
   const result=await db().prepare('SELECT * FROM event_facts ORDER BY key').all<{key:string;layer:Fact['layer'];source:string;retrieved_at:string;as_of:string|null;value_json:string}>();
@@ -78,7 +82,7 @@ export async function context(userId:string,section?:string|null) {
   const time=new Date();
   const headings=runbook.split(/^## /m).slice(1);
   const selected=section===undefined?runbook:section?headings.find(s=>s.split('\n')[0].trim()===section):undefined;
-  const data={web_search:runtimeEnv.EXA_API_KEY?'available_on_request':'not_configured',portal_connection:runtimeEnv.AITINKERERS_API_KEY?'available_on_request':'not_connected',current_time:time.toISOString(),local_time:time.toLocaleString('en-US',{timeZone:'America/Los_Angeles'}),timezone:'America/Los_Angeles',event_date:'2030-09-14',runbook:selected||null,event_state:section===undefined?(await facts()).filter(f=>!f.key.startsWith('_')):[],organizer_entries:section===null?await readEntries(userId):{entries:[],total:0,limit:0,coverage:'Notes not requested'}};
+  const data={organizer_updates:await readOrganizerUpdates(userId),web_search:runtimeEnv.EXA_API_KEY?'available_on_request':'not_configured',portal_connection:runtimeEnv.AITINKERERS_API_KEY?'available_on_request':'not_connected',current_time:time.toISOString(),local_time:time.toLocaleString('en-US',{timeZone:'America/Los_Angeles'}),timezone:'America/Los_Angeles',event_date:'2030-09-14',runbook:selected||null,event_state:section===undefined?(await facts()).filter(f=>!f.key.startsWith('_')):[],organizer_entries:section===null?await readEntries(userId):{entries:[],total:0,limit:0,coverage:'Notes not requested'}};
   if(section!==undefined) { // Keep tool payloads small enough for the demo API project's token limits.
     let chars=0; data.organizer_entries.entries=data.organizer_entries.entries.slice(0,12).filter(e=>(chars+=JSON.stringify(e).length)<=1800);
   }
